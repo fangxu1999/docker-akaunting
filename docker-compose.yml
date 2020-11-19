@@ -1,65 +1,62 @@
-version: '2'
+version: "3"
 
 volumes:
-    www-data:
-    virtualhost:
+  www-data:
+  virtualhost:
 
 services:
   mysql:
     restart: unless-stopped
-    image: mysql:5.7
+    image: mariadb
     environment:
-        - MYSQL_USER=akaunting
-        - MYSQL_PASSWORD=password
-        - MYSQL_DATABASE=akaunting_db
-        - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_USER=akaunting
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=akaunting_db
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
     volumes:
-        - ./storage/mysql:/var/lib/mysql
+      - ./storage/mysql:/var/lib/mysql
 
   nginx:
     restart: unless-stopped
-    image: nginx:1.19
+    image: nginx
     depends_on:
-        - akaunting
+      - akaunting
     ports:
-        - "10080:80"
+      - "10080:80"
     volumes:
-        - www-data:/var/www/akaunting:ro
-        - virtualhost:/etc/nginx/conf.d:ro
+      - www-data:/var/www/akaunting:ro
+      - virtualhost:/etc/nginx/conf.d:ro
 
   akaunting:
     restart: unless-stopped
-    image: kumaxim/akaunting:2.0.19
+    image: fangxu1999/akaunting:2.0.26
     build:
-        context: ./compose-build/php
+      context: ./compose-build/php
     command: app:akaunting
     environment:
-        - DEBUG=true
-        - TZ=Asia/Kolkata
+      - DEBUG=true
+      - TZ=Asia/Kolkata
 
-        - DB_HOST=mysql
-        - DB_USER=akaunting
-        - DB_PASS=password
-        - DB_NAME=akaunting_db
+      - DB_HOST=mysql
+      - DB_USER=akaunting
+      - DB_PASS=password
+      - DB_NAME=akaunting_db
 
-        - AKAUNTING_URL=http://localhost:10080
+      - AKAUNTING_URL=http://localhost:10080
 
-        - AKAUNTING_COMPANY_NAME=Acme Inc.
-        - AKAUNTING_COMPANY_EMAIL=my@example.com
+      - AKAUNTING_COMPANY_NAME=Acme Inc.
+      - AKAUNTING_COMPANY_EMAIL=my@example.com
 
-        - AKAUNTING_ADMIN_EMAIL=my@example.com
-        - AKAUNTING_ADMIN_PASSWORD=password
+      - AKAUNTING_ADMIN_EMAIL=my@example.com
+      - AKAUNTING_ADMIN_PASSWORD=password
 
-        - AKAUNTING_BACKUPS_EXPIRY=0
+      - AKAUNTING_BACKUPS_EXPIRY=0
 
-        - AKAUNTING_PHP_FPM_HOST=akaunting
-        - AKAUNTING_PHP_FPM_PORT=9000
+      - AKAUNTING_PHP_FPM_HOST=akaunting
+      - AKAUNTING_PHP_FPM_PORT=9000
     depends_on:
-        - mysql
+      - mysql
     volumes:
-        - www-data:/var/www/akaunting
-        - virtualhost:/etc/docker-akaunting/runtime/nginx/conf.d
-        - ./storage/akaunting:/var/lib/akaunting
-
-  
-    
+      - www-data:/var/www/akaunting
+      - virtualhost:/etc/docker-akaunting/runtime/nginx/conf.d
+      - ./storage/akaunting:/var/lib/akaunting
